@@ -1,0 +1,25 @@
+# maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# gradle por si acaso
+.gradle/
+build/
+
+# editores
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# sistema
+.DS_Store
+
+# configuracion local, no se sube
+application-local.properties
+.env
