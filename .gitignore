@@ -46,6 +46,12 @@ build/
 # sistema
 .DS_Store
 
+# logs y base h2 local
+*.log
+logs/
+data/*.mv.db
+data/*.trace.db
+
 # configuracion local, no se sube
 application-local.properties
 .env
