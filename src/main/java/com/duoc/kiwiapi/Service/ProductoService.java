@@ -2,8 +2,12 @@ package com.duoc.kiwiapi.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.duoc.kiwiapi.Model.ProductoModel;
 
+@Service 
 public class ProductoService {
     //Por hacer
     //Funciones sin hacer usadas en el primer controller: obtenerTodos(), obtenerPorId(id), guardar(producto), actualizar(id, producto), eliminar(id)

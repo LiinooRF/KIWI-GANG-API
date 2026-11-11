@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 //Importes sin base creada. (Nombres de files puestos por el momento.)
 import com.duoc.kiwiapi.Model.ProductoModel;
-//Todas las funciones usadas desde Service son nombres teoricos tambien. (En rojo)
+//Todas las funciones usadas desde Service son nombres teoricos tambien.
 import com.duoc.kiwiapi.Service.ProductoService;
 
 @RestController 
