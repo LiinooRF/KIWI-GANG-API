@@ -39,7 +39,7 @@ public class OrdenController {
     @PostMapping 
     public ResponseEntity<OrdenModel> crearOrden(@RequestBody OrdenModel orden) {
         System.out.println("[OrdenController] -> crearOrden");
-        OrdenModel nuevaOrden = ordenService.crearOrden(orden);
+        OrdenModel nuevaOrden = ordenService.guardar(orden);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaOrden); // 201 Created
     }
 }

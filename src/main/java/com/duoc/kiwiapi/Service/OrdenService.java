@@ -14,7 +14,7 @@ public class OrdenService {
         return null;
     }
 
-    public OrdenModel crearOrden(OrdenModel orden) {
+    public OrdenModel guardar(OrdenModel orden) {
         // Generar código, calcular total y descontar stock
         return null;
     }
