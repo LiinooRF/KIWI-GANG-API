@@ -37,14 +37,16 @@ swagger queda en http://localhost:8080/swagger-ui.html
 
 ## despliegue en aws (learner lab)
 
+todo queda en una sola ec2 con docker: mysql, la api y el frontend (el front se despliega
+desde el otro repo). en cada deploy se borran los contenedores y se crean de nuevo, la base
+parte vacia cada vez.
+
 el workflow `.github/workflows/ci.yml` tiene dos jobs:
 
 - `build`: compila y corre los tests, en cada pull request y en cada push a staging
-- `deploy`: solo en push a staging, sube el jar a la ec2 por scp y reinicia la api
+- `deploy`: solo en push a staging, sube el jar a la ec2 y corre `deploy/desplegar.sh`
 
-### preparar la ec2 (se hace una sola vez)
-
-todo corre en una sola ec2: la api y mysql juntos.
+### preparar la ec2 (una sola vez)
 
 1. en el learner lab crear una instancia amazon linux 2023 con el key pair `vockey`
 2. descargar `labsuser.pem` desde aws details y entrar:
@@ -53,59 +55,30 @@ todo corre en una sola ec2: la api y mysql juntos.
 ssh -i labsuser.pem ec2-user@IP_PUBLICA
 ```
 
-3. instalar java y mysql:
+3. instalar docker:
 
 ```
-sudo dnf install -y java-21-amazon-corretto-headless
-sudo dnf install -y https://repo.mysql.com/mysql97-community-release-el9-1.noarch.rpm
-sudo sed -i 's/$releasever/9/g' /etc/yum.repos.d/mysql-community*.repo
-sudo dnf install -y mysql-community-server
-sudo systemctl enable --now mysqld
+sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker ec2-user
 ```
 
-(el sed es porque el repo de mysql no reconoce la version de amazon linux)
+y salir y volver a entrar por ssh para que tome el permiso de docker.
 
-4. mysql parte con una clave temporal para root, se ve con:
-
-```
-sudo grep 'temporary password' /var/log/mysqld.log
-```
-
-entrar con `mysql -u root -p` y crear el usuario de la api (mysql pide claves con mayuscula, numero y simbolo):
-
-```
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'Root-Kiwi-2026';
-CREATE USER 'kiwi'@'localhost' IDENTIFIED BY 'Api-Kiwi-2026';
-GRANT ALL ON kiwiexpress.* TO 'kiwi'@'localhost';
-```
-
-5. crear el archivo `/home/ec2-user/kiwiapi.env` (queda solo en la ec2, nunca en el repo):
-
-```
-DB_USER=kiwi
-DB_PASSWORD=Api-Kiwi-2026
-JWT_SECRET=una-clave-larga-de-32-caracteres-o-mas
-```
-
-6. despues del primer deploy, para que la api parta sola si se reinicia la instancia:
-
-```
-sudo systemctl enable kiwiapi
-```
+la api queda en el puerto 8080 y el front en el 80.
 
 ### secrets en github
 
-en settings > secrets and variables > actions del repo:
+en settings > secrets and variables > actions de este repo:
 
-- `EC2_KEY`: el contenido completo de `labsuser.pem`
 - `EC2_HOST`: la ip publica de la instancia
+- `EC2_KEY`: el contenido completo de `labsuser.pem`
+- `DB_PASSWORD`: la clave que va a tener mysql, cualquiera
+- `JWT_SECRET`: la clave para firmar los token, de 32 caracteres o mas
 
 si faltan los secrets el job de deploy no falla, solo avisa y no despliega.
 
 ### ojo cuando se reinicia el lab
 
-el lab se apaga solo despues de unas horas y al volver a prenderlo la instancia cambia de ip publica.
-la llave `labsuser.pem` es la misma, asi que solo hay que actualizar `EC2_HOST` con la ip nueva
-(se ve en la consola de ec2) y volver a correr el workflow desde la pestaña actions.
-
-el lab no deja crear roles iam, si en algun lado pide un rol hay que poner `LabRole`.
+al volver a prender el lab la instancia cambia de ip publica, hay que actualizar `EC2_HOST`
+en los dos repos y volver a correr los workflows desde la pestaña actions.
