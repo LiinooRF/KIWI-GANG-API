@@ -43,10 +43,12 @@ jobs:
           name: kiwiapi-jar
           path: target
 
-      - name: subir el jar a la ec2 y reiniciar la api
+      - name: subir el jar a la ec2 y desplegar
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_KEY: ${{ secrets.EC2_KEY }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           # si todavia no estan los secrets no se cae, solo avisa
           if [ -z "$EC2_HOST" ] || [ -z "$EC2_KEY" ]; then
@@ -56,6 +58,6 @@ jobs:
           echo "$EC2_KEY" > llave.pem
           chmod 600 llave.pem
           scp -i llave.pem -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_HOST:/home/ec2-user/kiwiapi.jar
-          scp -i llave.pem -o StrictHostKeyChecking=no deploy/kiwiapi.service ec2-user@$EC2_HOST:/home/ec2-user/kiwiapi.service
-          ssh -i llave.pem -o StrictHostKeyChecking=no ec2-user@$EC2_HOST "sudo cp kiwiapi.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl restart kiwiapi"
+          scp -i llave.pem -o StrictHostKeyChecking=no deploy/desplegar.sh ec2-user@$EC2_HOST:/home/ec2-user/desplegar.sh
+          ssh -i llave.pem -o StrictHostKeyChecking=no ec2-user@$EC2_HOST "DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' bash desplegar.sh"
           rm llave.pem
