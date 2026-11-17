@@ -27,3 +27,35 @@ jobs:
         with:
           name: kiwiapi-jar
           path: target/*.jar
+
+  # el deploy va aparte y solo corre cuando el cambio ya llego a staging
+  # en los pull request no corre, asi no se despliega nada sin revisar
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: bajar el jar que armo el job de arriba
+        uses: actions/download-artifact@v4
+        with:
+          name: kiwiapi-jar
+          path: target
+
+      - name: subir el jar a la ec2 y reiniciar la api
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_KEY: ${{ secrets.EC2_KEY }}
+        run: |
+          # si todavia no estan los secrets no se cae, solo avisa
+          if [ -z "$EC2_HOST" ] || [ -z "$EC2_KEY" ]; then
+            echo "faltan los secrets EC2_HOST o EC2_KEY, no se despliega (ver el readme)"
+            exit 0
+          fi
+          echo "$EC2_KEY" > llave.pem
+          chmod 600 llave.pem
+          scp -i llave.pem -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_HOST:/home/ec2-user/kiwiapi.jar
+          scp -i llave.pem -o StrictHostKeyChecking=no deploy/kiwiapi.service ec2-user@$EC2_HOST:/home/ec2-user/kiwiapi.service
+          ssh -i llave.pem -o StrictHostKeyChecking=no ec2-user@$EC2_HOST "sudo cp kiwiapi.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl restart kiwiapi"
+          rm llave.pem
