@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import com.duoc.kiwiapi.Model.UsuarioModel;
 
-@Service
+@Service 
 public class UsuarioService {
     //Por hacer
     public List<UsuarioModel> obtenerTodos() {
