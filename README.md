@@ -44,38 +44,54 @@ el workflow `.github/workflows/ci.yml` tiene dos jobs:
 
 ### preparar la ec2 (se hace una sola vez)
 
-1. entrar al learner lab, darle a start lab y esperar que quede en verde
-2. en ec2 crear una instancia amazon linux 2023, t2.micro o t3.micro, con el key pair `vockey`
-3. en el security group abrir el puerto 22 (ssh) y el 8080 (la api)
-4. en aws details descargar la llave `labsuser.pem` y entrar a la instancia:
+todo corre en una sola ec2: la api y mysql juntos.
+
+1. en el learner lab crear una instancia amazon linux 2023 con el key pair `vockey`
+2. descargar `labsuser.pem` desde aws details y entrar:
 
 ```
 ssh -i labsuser.pem ec2-user@IP_PUBLICA
 ```
 
-5. instalar java y mysql (mariadb) en la instancia:
+3. instalar java y mysql:
 
 ```
-sudo dnf install -y java-21-amazon-corretto-headless mariadb105-server
-sudo systemctl enable --now mariadb
-sudo mysql -e "CREATE USER 'kiwi'@'localhost' IDENTIFIED BY 'una-clave'; GRANT ALL ON kiwiexpress.* TO 'kiwi'@'localhost';"
+sudo dnf install -y java-21-amazon-corretto-headless
+sudo dnf install -y https://repo.mysql.com/mysql97-community-release-el9-1.noarch.rpm
+sudo sed -i 's/$releasever/9/g' /etc/yum.repos.d/mysql-community*.repo
+sudo dnf install -y mysql-community-server
+sudo systemctl enable --now mysqld
 ```
 
-6. crear el archivo `/home/ec2-user/kiwiapi.env` con las variables (este archivo queda solo en la ec2, nunca en el repo):
+(el sed es porque el repo de mysql no reconoce la version de amazon linux)
+
+4. mysql parte con una clave temporal para root, se ve con:
+
+```
+sudo grep 'temporary password' /var/log/mysqld.log
+```
+
+entrar con `mysql -u root -p` y crear el usuario de la api (mysql pide claves con mayuscula, numero y simbolo):
+
+```
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Root-Kiwi-2026';
+CREATE USER 'kiwi'@'localhost' IDENTIFIED BY 'Api-Kiwi-2026';
+GRANT ALL ON kiwiexpress.* TO 'kiwi'@'localhost';
+```
+
+5. crear el archivo `/home/ec2-user/kiwiapi.env` (queda solo en la ec2, nunca en el repo):
 
 ```
 DB_USER=kiwi
-DB_PASSWORD=una-clave
+DB_PASSWORD=Api-Kiwi-2026
 JWT_SECRET=una-clave-larga-de-32-caracteres-o-mas
 ```
 
-7. hacer que el servicio parta solo cuando se prenda la instancia:
+6. despues del primer deploy, para que la api parta sola si se reinicia la instancia:
 
 ```
 sudo systemctl enable kiwiapi
 ```
-
-(el archivo del servicio lo copia el deploy, esta en `deploy/kiwiapi.service`)
 
 ### secrets en github
 
