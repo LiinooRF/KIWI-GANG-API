@@ -2,7 +2,7 @@
 # se copia a /etc/systemd/system/kiwiapi.service (ver el readme)
 [Unit]
 Description=KiwiExpress API
-After=network.target mariadb.service
+After=network.target mysqld.service
 
 [Service]
 User=ec2-user
