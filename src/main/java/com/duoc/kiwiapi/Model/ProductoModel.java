@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,13 +28,16 @@ public class ProductoModel {
     @Column(unique = true) //unique evita que se repita el codigo del producto
     private String codigo;
 
+    @NotBlank(message = "El nombre no puede estar vacío")
     private String nombre;
     
     @Column(length = 500) //descripcion maxima de 500 caracteres
     private String descripcion;
 
+    @Min(value = 1, message = "El precio debe ser mayor a 0")
     private Integer precio;
 
+    @Min(value = 0, message = "El stock no puede ser negativo")
     private Integer stock;
 
     private Integer stockCritico;
