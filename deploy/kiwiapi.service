@@ -1,0 +1,16 @@
+# servicio para que la api corra sola en la ec2 y se levante si se reinicia
+# se copia a /etc/systemd/system/kiwiapi.service (ver el readme)
+[Unit]
+Description=KiwiExpress API
+After=network.target mariadb.service
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user
+# aca estan DB_USER, DB_PASSWORD y JWT_SECRET, ese archivo solo existe en la ec2
+EnvironmentFile=/home/ec2-user/kiwiapi.env
+ExecStart=/usr/bin/java -jar /home/ec2-user/kiwiapi.jar
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
