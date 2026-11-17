@@ -61,7 +61,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioActualizado); 
     }
     
-    @DeleteMapping 
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         System.out.println("[UsuarioController] -> eliminarUsuario");
         UsuarioModel usuarioExistente = usuarioService.obtenerPorId(id);
