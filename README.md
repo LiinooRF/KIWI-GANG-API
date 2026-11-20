@@ -65,6 +65,13 @@ sudo usermod -aG docker ec2-user
 
 y salir y volver a entrar por ssh para que tome el permiso de docker.
 
+4. dejar la ip fija con una elastic ip, en la consola ec2 a la izquierda abajo:
+
+   elastic ips -> allocate -> associate con la instancia
+
+   asi la ip no cambia aunque la maquina se apague y prenda. sin esto la ip cambia cada vez
+   y hay que andar actualizando los secrets.
+
 la api queda en el puerto 8080 y el front en el 80.
 
 ### secrets en github
@@ -78,7 +85,19 @@ en settings > secrets and variables > actions de este repo:
 
 si faltan los secrets el job de deploy no falla, solo avisa y no despliega.
 
-### ojo cuando se reinicia el lab
+### prender la maquina un dia normal
 
-al volver a prender el lab la instancia cambia de ip publica, hay que actualizar `EC2_HOST`
-en los dos repos y volver a correr los workflows desde la pestaña actions.
+con la elastic ip asociada no hay que tocar nada en github:
+
+1. start lab y esperar que quede en verde
+2. en la consola ec2 -> instances -> seleccionar la instancia -> instance state -> start
+3. esperar un minuto y listo, docker levanta los contenedores solo y queda todo en la misma ip
+
+el front en http://LA_IP y la api en http://LA_IP:8080/swagger-ui.html
+
+### si el lab borra todo
+
+cuando el lab se termina de verdad borra todos los recursos. hay que repetir los pasos de
+preparar la ec2 (crear la instancia, instalar docker, asociar una elastic ip nueva) y despues
+actualizar `EC2_HOST` en los dos repos y correr los workflows una vez desde la pestaña
+actions (run workflow), porque el front guarda la ip del api al compilar.
