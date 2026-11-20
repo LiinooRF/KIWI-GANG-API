@@ -46,31 +46,18 @@ el workflow `.github/workflows/ci.yml` tiene dos jobs:
 - `build`: compila y corre los tests, en cada pull request y en cada push a staging
 - `deploy`: solo en push a staging, sube el jar a la ec2 y corre `deploy/desplegar.sh`
 
-### preparar la ec2 (una sola vez)
+### cualquier maquina nueva
+
+el deploy funciona en cualquier ec2 que creemos, no hay que instalar nada a mano (docker lo
+instala el workflow solo si falta):
 
 1. en el learner lab crear una instancia amazon linux 2023 con el key pair `vockey`
-2. descargar `labsuser.pem` desde aws details y entrar:
+2. en el security group abrir los puertos 22 (ssh), 80 (el front) y 8080 (la api)
+3. poner la ip de la instancia en el secret `EC2_HOST` de los dos repos
+4. correr los workflows desde la pestaña actions (o empujar algo a staging)
 
-```
-ssh -i labsuser.pem ec2-user@IP_PUBLICA
-```
-
-3. instalar docker:
-
-```
-sudo dnf install -y docker
-sudo systemctl enable --now docker
-sudo usermod -aG docker ec2-user
-```
-
-y salir y volver a entrar por ssh para que tome el permiso de docker.
-
-4. dejar la ip fija con una elastic ip, en la consola ec2 a la izquierda abajo:
-
-   elastic ips -> allocate -> associate con la instancia
-
-   asi la ip no cambia aunque la maquina se apague y prenda. sin esto la ip cambia cada vez
-   y hay que andar actualizando los secrets.
+opcional pero recomendado: asociarle una elastic ip (consola ec2, abajo a la izquierda,
+allocate y associate) para que la ip no cambie al reiniciar la maquina.
 
 la api queda en el puerto 8080 y el front en el 80.
 
