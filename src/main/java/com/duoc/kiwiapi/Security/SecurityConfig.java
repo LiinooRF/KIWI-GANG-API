@@ -52,6 +52,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(rutas -> rutas
                 //Abierto: login y swagger.
                 .requestMatchers("/api/v1/auth/**").permitAll()
+                //Spring redirige los errores a /error, si no esta abierto los 400 llegan como 403.
+                .requestMatchers("/error").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 //La tienda ve productos y categorias sin login.
                 .requestMatchers(HttpMethod.GET, "/api/v1/productos/**", "/api/v1/categorias/**").permitAll()
