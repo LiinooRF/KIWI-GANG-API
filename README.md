@@ -37,9 +37,28 @@ swagger queda en http://localhost:8080/swagger-ui.html
 
 ## despliegue en aws (learner lab)
 
-el despliegue se hace TODO desde el repo del frontend con un solo workflow
-(`deploy.yml` de KIWI-GANG): compila este backend, lo sube a la ec2 y lo deja
-corriendo con mysql y la pagina, todo con docker. los secrets y el paso a paso
-estan explicados en el README de ese repo.
+este repo despliega el backend solo: cada push a staging corre las pruebas y despues
+sube el jar a la ec2 (tambien con el boton run workflow de la pestaña actions). el
+frontend se despliega desde su propio repo, cada uno lo suyo.
 
-este repo solo tiene el ci que compila y corre las pruebas en cada pull request.
+en la ec2 la api queda en el puerto 8080 y mysql en un contenedor interno que no se
+borra entre deploys, asi no se pierden los usuarios y las ordenes.
+
+### preparar una ec2 (cualquiera sirve)
+
+1. crear una instancia amazon linux 2023 con el key pair `vockey`
+2. abrir los puertos 22 (ssh), 80 (la pagina) y 8080 (la api)
+3. asociarle una elastic ip para que la ip no cambie al reiniciar (recomendado)
+
+docker no hay que instalarlo, lo instala el deploy solo si falta.
+
+### secrets en github (en este repo)
+
+en settings > secrets and variables > actions:
+
+- `EC2_HOST`: la ip publica de la instancia
+- `EC2_KEY`: el contenido completo de `labsuser.pem`
+- `DB_PASSWORD`: la clave que va a tener mysql, cualquiera
+- `JWT_SECRET`: la clave para firmar los token del login, 32 caracteres o mas
+
+si faltan los secrets el deploy no falla, solo avisa y no despliega.
