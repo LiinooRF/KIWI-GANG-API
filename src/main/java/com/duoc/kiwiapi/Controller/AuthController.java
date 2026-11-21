@@ -47,6 +47,15 @@ public class AuthController {
         return ResponseEntity.ok(new RespuestaLogin(token, usuario.getNombre(), usuario.getCorreo(), usuario.getRol()));
     }
 
+    //Registro publico: cualquiera puede crear su cuenta, pero siempre como cliente,
+    //el rol que venga en el json se ignora. Los usuarios con otros roles los crea el admin.
+    @PostMapping("/registro")
+    public ResponseEntity<?> registro(@RequestBody UsuarioModel usuario) {
+        usuario.setRol("cliente");
+        UsuarioModel nuevo = usuarioService.guardar(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+    }
+
     //Lo que devuelve el login. El front guarda el token y el rol lo usa para las vistas.
     record RespuestaLogin(String token, String nombre, String correo, String rol) {}
 }
