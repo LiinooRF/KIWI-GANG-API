@@ -5,6 +5,8 @@ on:
     branches: [main, staging]
   push:
     branches: [staging]
+  #para poder lanzarlo a mano desde la pestaña actions, con el boton run workflow
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,7 +25,7 @@ jobs:
 
       - name: subir el jar como artefacto
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'push'
+        if: github.event_name != 'pull_request'
         with:
           name: kiwiapi-jar
           path: target/*.jar
@@ -32,7 +34,7 @@ jobs:
   # en los pull request no corre, asi no se despliega nada sin revisar
   deploy:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
