@@ -44,7 +44,9 @@ public class ProductoModel {
 
     private String imagen;
 
-    private boolean enOferta;
+    //Boolean con mayuscula para que admita null, si no falla cuando una orden
+    //trae el producto solo con el id y los demas campos vienen vacios
+    private Boolean enOferta;
 
     private Integer precioOferta;
 

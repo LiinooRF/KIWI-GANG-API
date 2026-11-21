@@ -59,5 +59,6 @@ jobs:
           chmod 600 llave.pem
           scp -i llave.pem -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_HOST:/home/ec2-user/kiwiapi.jar
           scp -i llave.pem -o StrictHostKeyChecking=no deploy/desplegar.sh ec2-user@$EC2_HOST:/home/ec2-user/desplegar.sh
-          ssh -i llave.pem -o StrictHostKeyChecking=no ec2-user@$EC2_HOST "DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' bash desplegar.sh"
+          #si la maquina es nueva y no tiene docker, se instala sola
+          ssh -i llave.pem -o StrictHostKeyChecking=no ec2-user@$EC2_HOST "command -v docker >/dev/null || sudo dnf install -y docker; sudo systemctl enable --now docker; DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' bash desplegar.sh"
           rm llave.pem

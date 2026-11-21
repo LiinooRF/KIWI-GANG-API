@@ -73,4 +73,14 @@ class LoginTest {
                 .content("{\"correo\": " + "\"nadie@kiwi.cl\"" + ", \"contrasena\": \"Clave-2026\"}"))
             .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void elRegistroPublicoSiempreCreaClientes() throws Exception {
+        //aunque el json mande otro rol, el registro publico lo ignora y crea un cliente
+        mvc.perform(post("/api/v1/auth/registro")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"run\":\"246813579\",\"nombre\":\"Nueva\",\"apellidos\":\"Persona\",\"correo\":\"nueva@kiwi.cl\",\"contrasena\":\"Clave-2026\",\"comuna\":\"Maipu\",\"rol\":\"administrador\"}"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.rol").value("cliente"));
+    }
 }
