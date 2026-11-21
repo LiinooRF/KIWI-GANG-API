@@ -72,7 +72,8 @@ public class OrdenService {
             productoRepository.save(producto);
 
             // si esta en oferta se cobra el precio de oferta, igual que en el carrito del frontend
-            int precio = producto.isEnOferta() ? producto.getPrecioOferta() : producto.getPrecio();
+            //si esta en oferta se cobra el precio de oferta, el TRUE.equals es por si viene null
+            int precio = Boolean.TRUE.equals(producto.getEnOferta()) ? producto.getPrecioOferta() : producto.getPrecio();
 
             detalle.setProducto(producto);
             detalle.setPrecioUnitario(precio);
